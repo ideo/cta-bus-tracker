@@ -46,6 +46,10 @@ class BusTracker():
         Example inputs:
             list(int):  vehicle_ids = [509, 392, 201, 4367]
             list(str, int):  routes = ["X3", 4, 20]
+
+            BUG: While the documentation states you can request up to ten  
+            routes, it seems to only return busses for the last route in the
+            list
         """
         payload = copy(self.default_payload)
 
