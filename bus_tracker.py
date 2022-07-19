@@ -1,8 +1,13 @@
 import os
 import json
+from copy import copy
 
 import requests
 from dotenv import load_dotenv
+
+
+import pprint
+pp = pprint.PrettyPrinter(indent=4)
 
 
 load_dotenv()
@@ -11,21 +16,23 @@ load_dotenv()
 class BusTracker():
     def __init__(self):
         self.base_url = "http://www.ctabustracker.com/bustime/api/v2/"
+        self.default_payload = {
+            "key":      os.environ["CTA_API_KEY"],
+            "format":   "json",
+            }
 
 
-    def _make_request(self, url, payload):
+    def _make_request(self, endpoint, payload):
+        url = self.base_url + endpoint
         response = requests.get(url, params=payload)
         content = json.loads(response.content)
+        assert(len(content.keys()) == 1)
+        content = content["bustime-response"]
         return content
     
 
     def get_system_time(self):
-        url = self.base_url + "gettime"
-        payload = {
-            "key":      os.environ["CTA_API_KEY"],
-            "format":   "json",
-            }
-        content = self._make_request(url, payload)
+        content = self._make_request("gettime", self.default_payload)
         print(content)
 
 
@@ -38,28 +45,31 @@ class BusTracker():
         --
         Example inputs:
             list(int):  vehicle_ids = [509, 392, 201, 4367]
-            list(str):  routes = ["X3", "4", "20"]
+            list(str, int):  routes = ["X3", 4, 20]
         """
-        url = self.base_url + "getvehicles"
+        payload = copy(self.default_payload)
 
         if len(vehicle_ids):
-            payload = {
-                "key":      os.environ["CTA_API_KEY"],
-                "format":   "json",
-                "vid":      vehicle_ids,
-            }
+            payload["vid"] = vehicle_ids            
 
         elif len(routes):
-            payload = {
-                "key":      os.environ["CTA_API_KEY"],
-                "format":   "json",
-                "rt":       routes,
-                }
+            payload["rt"] = routes
 
-        content = self._make_request(url, payload)
+        content = self._make_request("getvehicles", payload)
+        content = content["vehicle"]
+        return content
+
+
+    def get_directions(self, route_designator):
+        """
+        """
+        payload = copy(self.default_payload)
+        payload["rt"] = route_designator
+        content = self._make_request("getdirections", payload)
         print(content)
 
 
 if __name__ == "__main__":
     tracker = BusTracker()
-    tracker.get_vehicles(routes=[66])
+    busses = tracker.get_vehicles(routes=["X9", 4, 66])
+    print(busses)
