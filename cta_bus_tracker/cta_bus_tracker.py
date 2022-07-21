@@ -75,5 +75,5 @@ class BusTracker():
 
 if __name__ == "__main__":
     tracker = BusTracker()
-    busses = tracker.get_vehicles(routes=["X9", 4, 66])
+    busses = tracker.get_vehicles(routes=[66])
     print(busses)
