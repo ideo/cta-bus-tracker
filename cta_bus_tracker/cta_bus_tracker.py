@@ -62,18 +62,43 @@ class BusTracker():
         content = self._make_request("getvehicles", payload)
         content = content["vehicle"]
         return content
+    
+
+    def get_patterns(self, pattern_ids=[], routes=[]):
+        """
+        TKTK
+        """
+        # We should look up why were copying this
+        payload = copy(self.default_payload)
+
+        if len(pattern_ids):
+            payload["pid"] = pattern_ids  
+
+        elif len(routes):
+            payload["rt"] = routes
+
+        content = self._make_request("getpatterns", payload)
+        content = content["ptr"]
+        return content
 
 
     def get_directions(self, route_designator):
         """
+        TKTK
         """
         payload = copy(self.default_payload)
         payload["rt"] = route_designator
         content = self._make_request("getdirections", payload)
-        print(content)
-
+        return content
+    
 
 if __name__ == "__main__":
     tracker = BusTracker()
-    busses = tracker.get_vehicles(routes=[66])
-    print(busses)
+    # busses = tracker.get_vehicles(routes=[66])
+    # print(busses)
+    # directions = tracker.get_directions(["66"])
+    # print(directions)
+    patterns = tracker.get_patterns(routes=["66"])
+    for pattern in patterns:
+        print(pattern)
+        print("")
