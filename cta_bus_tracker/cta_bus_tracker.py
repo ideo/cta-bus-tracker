@@ -64,7 +64,7 @@ class BusTracker():
         return content
     
 
-    def get_patterns(self, pattern_ids=[], routes=[]):
+    def get_patterns(self, pattern_ids=[], route=None):
         """
         TKTK
         """
@@ -72,14 +72,22 @@ class BusTracker():
         payload = copy(self.default_payload)
 
         if len(pattern_ids):
-            payload["pid"] = pattern_ids  
+            # The payload must be a comma separated list as a string.
+            payload["pid"] = ",".join([str(ptrn) for ptrn in pattern_ids])
 
-        elif len(routes):
-            payload["rt"] = routes
+        elif route is not None:
+            # Only one route designator may be supplied at a time.
+            payload["rt"] = route
 
         content = self._make_request("getpatterns", payload)
-        content = content["ptr"]
-        return content
+        if "error" not in content.keys():
+            content = content["ptr"]
+            return content
+    
+        else:
+            # TODO: Make a custom exception!
+            print(content["error"])
+            raise Exception
 
 
     def get_directions(self, route_designator):
@@ -90,15 +98,3 @@ class BusTracker():
         payload["rt"] = route_designator
         content = self._make_request("getdirections", payload)
         return content
-    
-
-if __name__ == "__main__":
-    tracker = BusTracker()
-    # busses = tracker.get_vehicles(routes=[66])
-    # print(busses)
-    # directions = tracker.get_directions(["66"])
-    # print(directions)
-    patterns = tracker.get_patterns(routes=["66"])
-    for pattern in patterns:
-        print(pattern)
-        print("")
